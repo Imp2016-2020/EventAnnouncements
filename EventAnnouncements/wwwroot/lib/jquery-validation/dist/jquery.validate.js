@@ -684,7 +684,7 @@ $.extend( $.validator, {
 		},
 
 		clean: function( selector ) {
-			return $( selector )[ 0 ];
+			return ( typeof selector === "string" ? $.find( selector ) : $( selector ) )[ 0 ];
 		},
 
 		errors: function() {
