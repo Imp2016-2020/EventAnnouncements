@@ -16,6 +16,12 @@
 	}
 }(function( $ ) {
 
+function find( selector, context ) {
+	return typeof selector === "string" ?
+		$( $.find( selector, context ) ) :
+		$( selector );
+}
+
 $.extend( $.fn, {
 
 	// https://jqueryvalidation.org/validate/
@@ -392,9 +398,9 @@ $.extend( $.validator, {
 	prototype: {
 
 		init: function() {
-			this.labelContainer = $( this.settings.errorLabelContainer );
+			this.labelContainer = find( this.settings.errorLabelContainer );
 			this.errorContext = this.labelContainer.length && this.labelContainer || $( this.currentForm );
-			this.containers = $( this.settings.errorContainer ).add( this.settings.errorLabelContainer );
+			this.containers = find( this.settings.errorContainer ).add( this.labelContainer );
 			this.submitted = {};
 			this.valueCache = {};
 			this.pendingRequest = 0;
@@ -964,7 +970,7 @@ $.extend( $.validator, {
 			} else {
 
 				// Create error element
-				error = $( "<" + this.settings.errorElement + ">" )
+				error = $( document.createElement( this.settings.errorElement ) )
 					.attr( "id", elementID + "-error" )
 					.addClass( this.settings.errorClass )
 					.html( message || "" );
@@ -975,7 +981,7 @@ $.extend( $.validator, {
 
 					// Make sure the element is visible, even in IE
 					// actually showing the wrapped element is handled elsewhere
-					place = error.hide().show().wrap( "<" + this.settings.wrapper + "/>" ).parent();
+					place = error.hide().show().wrap( document.createElement( this.settings.wrapper ) ).parent();
 				}
 				if ( this.labelContainer.length ) {
 					this.labelContainer.append( place );
@@ -1069,7 +1075,7 @@ $.extend( $.validator, {
 			}
 
 			// Always apply ignore filter
-			return $( element ).not( this.settings.ignore )[ 0 ];
+			return $( element ).not( find( this.settings.ignore, this.currentForm ) )[ 0 ];
 		},
 
 		checkable: function( element ) {
@@ -1101,7 +1107,7 @@ $.extend( $.validator, {
 				return param;
 			},
 			"string": function( param, element ) {
-				return !!$( param, element.form ).length;
+				return !!find( param, element.form ).length;
 			},
 			"function": function( param, element ) {
 				return param( element );
@@ -1318,7 +1324,7 @@ $.extend( $.validator, {
 				var keepRule = true;
 				switch ( typeof val.depends ) {
 				case "string":
-					keepRule = !!$( val.depends, element.form ).length;
+					keepRule = !!find( val.depends, element.form ).length;
 					break;
 				case "function":
 					keepRule = val.depends.call( element, element );
@@ -1549,7 +1555,7 @@ $.extend( $.validator, {
 		equalTo: function( value, element, param ) {
 
 			// Bind to the blur event of the target in order to revalidate whenever the target field is updated
-			var target = $( param );
+			var target = find( param );
 			if ( this.settings.onfocusout && target.not( ".validate-equalTo-blur" ).length ) {
 				target.addClass( "validate-equalTo-blur" ).on( "blur.validate-equalTo", function() {
 					$( element ).valid();
